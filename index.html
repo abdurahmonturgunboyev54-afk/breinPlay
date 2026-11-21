@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brain Play — Bolalar Uchun Aql O‘yinlari Platformasi</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-theme="sunset">
+
+    <!-- Konfetti uchun Canvas -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg sticky-top brain-navbar">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="#" onclick="app.goHome()">
+                <div class="brand-logo">🧠</div>
+                <span class="brand-text">Brain<span>Play</span></span>
+            </a>
+
+            <div class="d-flex align-items-center gap-2 gap-md-3 order-lg-3">
+                <!-- Orqa fon mavzusini o'zgartirish -->
+                <div class="dropdown">
+                    <button class="btn btn-icon-round dropdown-toggle hide-arrow" type="button" data-bs-toggle="dropdown" title="Orqa fonni o‘zgartirish">
+                        <i class="bi bi-palette-fill"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4 p-2">
+                        <li><h6 class="dropdown-header fw-bold">Fon mavzusi</h6></li>
+                        <li><a class="dropdown-item rounded-3 fw-semibold" href="#" onclick="app.setTheme('sunset')">🌅 Sehrli Oqshom</a></li>
+                        <li><a class="dropdown-item rounded-3 fw-semibold" href="#" onclick="app.setTheme('galaxy')">🌌 Kosmik Galaxy</a></li>
+                        <li><a class="dropdown-item rounded-3 fw-semibold" href="#" onclick="app.setTheme('forest')">🌳 Sehrli O‘rmon</a></li>
+                        <li><a class="dropdown-item rounded-3 fw-semibold" href="#" onclick="app.setTheme('candy')">🍬 Shirinliklar Olami</a></li>
+                    </ul>
+                </div>
+
+                <!-- Kunlik Bonus Tugmasi -->
+                <button class="btn btn-bonus position-relative" id="daily-bonus-btn" onclick="app.claimDailyBonus()" title="Kunlik bonus">
+                    <i class="bi bi-gift-fill"></i>
+                    <span class="d-none d-sm-inline ms-1">Bonus</span>
+                    <span class="bonus-dot" id="bonus-dot"></span>
+                </button>
+
+                <!-- Ovozni boshqarish -->
+                <button class="btn btn-icon-round" id="sound-toggle-btn" onclick="app.toggleSound()" title="Ovozni yoqish/o‘chirish">
+                    <i class="bi bi-volume-up-fill" id="sound-icon"></i>
+                </button>
+
+                <!-- Yulduzlar hisoblagichi -->
+                <div class="star-badge" onclick="app.openProfileModal()" style="cursor: pointer;" title="Yulduzlar do‘koniga o‘tish">
+                    <i class="bi bi-star-fill text-warning"></i>
+                    <span id="nav-stars">0</span>
+                </div>
+
+                <!-- Profil tugmasi -->
+                <button class="btn btn-profile d-flex align-items-center gap-2" onclick="app.openProfileModal()">
+                    <span id="nav-avatar" class="avatar-mini">🦊</span>
+                    <span id="nav-username" class="d-none d-md-inline fw-bold">O‘yinchi</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ASOSIY KONTENT KONTEYNERI -->
+    <main class="container py-4">
+
+        <!-- 1. BOSH SAHIFA (HOME VIEW) -->
+        <section id="view-home" class="view-section active">
+            <!-- Hero Banner -->
+            <div class="hero-card p-4 p-md-5 mb-5">
+                <div class="row align-items-center">
+                    <div class="col-lg-7 text-center text-lg-start">
+                        <span class="badge-pill-custom mb-3 d-inline-block">🚀 2100+ Interaktiv Topshiriqlar</span>
+                        <h1 class="hero-title mb-3">O‘yna, O‘rgan va <span class="highlight-text">Daho</span> Bo‘l!</h1>
+                        <p class="hero-subtitle mb-4">Mantiq, matematika, xotira va diqqatni charxlovchi quvnoq o‘yinlar olamiga xush kelibsiz! O‘z yoshingizni tanlang va sarguzashtni boshlang.</p>
+                        <div class="d-flex flex-wrap gap-3 justify-content-center justify-content-lg-start">
+                            <a href="#age-section" class="btn btn-play-lg">
+                                <i class="bi bi-controller me-2"></i>O‘yinni Boshlash
+                            </a>
+                            <button class="btn btn-daily-lg" onclick="app.startDailyChallenge()">
+                                <i class="bi bi-lightning-charge-fill me-2"></i>Kunlik Topshiriq
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-lg-5 text-center mt-4 mt-lg-0">
+                        <div class="hero-characters">
+                            <div class="floating-char char-1">🦁</div>
+                            <div class="floating-char char-2">🤖</div>
+                            <div class="floating-char char-3">🦉</div>
+                            <div class="hero-brain-mascot">🧠✨</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Qidiruv va Reyting Paneli -->
+            <div class="row g-3 mb-5 align-items-center">
+                <div class="col-md-7">
+                    <div class="search-box">
+                        <i class="bi bi-search"></i>
+                        <input type="text" id="global-search" class="form-control" placeholder="O‘yin yoki yo‘nalishni qidiring (masalan: Matematika, Xotira)..." onkeyup="app.handleSearch(this.value)">
+                    </div>
+                </div>
+                <div class="col-md-5 d-flex gap-2 justify-content-md-end">
+                    <button class="btn btn-outline-fun flex-fill flex-md-grow-0" onclick="app.openLeaderboardModal()">
+                        <i class="bi bi-trophy-fill text-warning me-2"></i>Reyting
+                    </button>
+                    <button class="btn btn-outline-fun flex-fill flex-md-grow-0" onclick="app.openProfileModal()">
+                        <i class="bi bi-shop text-danger me-2"></i>Yulduzlar Do‘koni
+                    </button>
+                </div>
+            </div>
+
+            <!-- Qidiruv natijalari -->
+            <div id="search-results-container" class="mb-5 d-none">
+                <h4 class="section-heading mb-3">🔍 Qidiruv natijalari</h4>
+                <div class="row g-3" id="search-results-grid"></div>
+            </div>
+
+            <!-- YOSH TOIFALARI -->
+            <div id="age-section" class="mb-5">
+                <div class="text-center mb-4">
+                    <h2 class="section-heading">Yoshingizni Tanlang</h2>
+                    <p class="text-muted fw-semibold">Har bir yosh guruhi uchun maxsus moslashtirilgan 700 ta o‘yin!</p>
+                </div>
+
+                <div class="row g-4">
+                    <!-- 6-9 Yosh -->
+                    <div class="col-md-4">
+                        <div class="age-card age-6-9" onclick="app.selectAge('6-9')">
+                            <div class="age-badge">Boshlang‘ich</div>
+                            <div class="age-mascot">🦊🎨</div>
+                            <h3 class="age-title">6–9 yosh</h3>
+                            <p class="age-desc">Rangli shakllar, quvnoq sanash, rasmli xotira va sodda jumboqlar olami.</p>
+                            <ul class="age-features">
+                                <li><i class="bi bi-check-circle-fill"></i> Yorqin vizual topshiriqlar</li>
+                                <li><i class="bi bi-check-circle-fill"></i> Qo‘shish va ayirish o‘yinlari</li>
+                                <li><i class="bi bi-check-circle-fill"></i> 7 ta yo‘nalish × 100 ta o‘yin</li>
+                            </ul>
+                            <button class="btn btn-age-select w-100 mt-3">Tanlash <i class="bi bi-arrow-right-circle-fill ms-1"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- 9-13 Yosh -->
+                    <div class="col-md-4">
+                        <div class="age-card age-9-13" onclick="app.selectAge('9-13')">
+                            <div class="age-badge">O‘rta daraja</div>
+                            <div class="age-mascot">🐼🚀</div>
+                            <h3 class="age-title">9–13 yosh</h3>
+                            <p class="age-desc">Tezkor hisob-kitob, mantiqiy ketma-ketliklar, diqqat va bilimdonlik sinovlari.</p>
+                            <ul class="age-features">
+                                <li><i class="bi bi-check-circle-fill"></i> Ko‘paytirish, bo‘lish va tenglamalar</li>
+                                <li><i class="bi bi-check-circle-fill"></i> Xotira va mantiqiy boshqotirmalar</li>
+                                <li><i class="bi bi-check-circle-fill"></i> 7 ta yo‘nalish × 100 ta o‘yin</li>
+                            </ul>
+                            <button class="btn btn-age-select w-100 mt-3">Tanlash <i class="bi bi-arrow-right-circle-fill ms-1"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- 13-17 Yosh -->
+                    <div class="col-md-4">
+                        <div class="age-card age-13-17" onclick="app.selectAge('13-17')">
+                            <div class="age-badge">Ekspert</div>
+                            <div class="age-mascot">🦉⚡</div>
+                            <h3 class="age-title">13–17 yosh</h3>
+                            <p class="age-desc">Murakkab mantiqiy masalalar, analitik fikrlash, tezkor qarorlar va strategiya.</p>
+                            <ul class="age-features">
+                                <li><i class="bi bi-check-circle-fill"></i> Algebraik va mantiqiy tahlil</li>
+                                <li><i class="bi bi-check-circle-fill"></i> Yuqori tezlikdagi diqqat testlari</li>
+                                <li><i class="bi bi-check-circle-fill"></i> 7 ta yo‘nalish × 100 ta o‘yin</li>
+                            </ul>
+                            <button class="btn btn-age-select w-100 mt-3">Tanlash <i class="bi bi-arrow-right-circle-fill ms-1"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. KATEGORIYALAR SAHIFASI (CATEGORIES VIEW) -->
+        <section id="view-categories" class="view-section d-none">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+                <button class="btn btn-back" onclick="app.goHome()">
+                    <i class="bi bi-arrow-left me-2"></i>Yosh toifalariga qaytish
+                </button>
+                <div class="selected-age-pill" id="current-age-badge">6–9 yosh</div>
+            </div>
+
+            <div class="text-center mb-4">
+                <h2 class="section-heading">O‘yin Yo‘nalishini Tanlang</h2>
+                <p class="text-muted fw-semibold">Har bir bo‘limda 100 ta bosqichma-bosqich murakkablashuvchi o‘yin mavjud</p>
+            </div>
+
+            <div class="row g-4" id="categories-grid"></div>
+        </section>
+
+        <!-- 3. 100 TA BOSQICH / TOPSHIRIQLAR XARITASI (LEVELS VIEW) -->
+        <section id="view-levels" class="view-section d-none">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+                <button class="btn btn-back" onclick="app.backToCategories()">
+                    <i class="bi bi-arrow-left me-2"></i>Yo‘nalishlarga qaytish
+                </button>
+                <div class="d-flex gap-2 align-items-center flex-wrap">
+                    <select class="form-select difficulty-filter" id="difficulty-filter" onchange="app.filterLevels(this.value)">
+                        <option value="all">Barcha darajalar (1–100)</option>
+                        <option value="easy">🟢 Oson (1–33)</option>
+                        <option value="medium">🟡 O‘rta (34–67)</option>
+                        <option value="hard">🔴 Qiyin (68–100)</option>
+                    </select>
+                    <button class="btn btn-random-play" onclick="app.playRandomLevel()">
+                        <i class="bi bi-shuffle me-1"></i>Tasodifiy O‘yin
+                    </button>
+                </div>
+            </div>
+
+            <div class="category-header-banner p-4 mb-4">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="d-flex align-items-center gap-3 mb-2">
+                            <span class="cat-icon-large" id="level-cat-icon">🧮</span>
+                            <div>
+                                <h2 class="mb-0 fw-bold" id="level-cat-title">Matematika</h2>
+                                <span class="badge bg-light text-dark" id="level-age-label">6–9 yosh</span>
+                            </div>
+                        </div>
+                        <p class="mb-0 opacity-75" id="level-cat-desc">Qo‘shish, ayirish va qiziqarli misollar</p>
+                    </div>
+                    <div class="col-md-4 mt-3 mt-md-0">
+                        <div class="bg-white bg-opacity-25 p-3 rounded-4">
+                            <div class="d-flex justify-content-between fw-bold mb-1">
+                                <span>Bajarilgan:</span>
+                                <span id="cat-progress-text">0 / 100</span>
+                            </div>
+                            <div class="progress" style="height: 12px; border-radius: 10px;">
+                                <div class="progress-bar bg-warning" id="cat-progress-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="levels-grid" id="levels-grid"></div>
+        </section>
+
+        <!-- 4. O‘YIN ARENASI (GAMEPLAY VIEW) -->
+        <section id="view-game" class="view-section d-none">
+            <div id="game-intro-card" class="game-card-container text-center p-4 p-md-5 mx-auto">
+                <div class="intro-icon mb-3" id="intro-icon">🧮</div>
+                <span class="badge rounded-pill px-3 py-2 mb-2 fs-6" id="intro-difficulty-badge">🟢 Oson daraja</span>
+                <h2 class="fw-bold mb-2" id="intro-title">Matematika — 1-bosqich</h2>
+                <p class="text-muted fs-5 mb-4" id="intro-desc">Berilgan misolni to‘g‘ri yeching va yulduzlarni qo‘lga kiriting!</p>
+                
+                <div class="rules-box text-start p-3 p-md-4 mb-4 mx-auto" style="max-width: 550px;">
+                    <h6 class="fw-bold text-primary mb-2"><i class="bi bi-info-circle-fill me-2"></i>O‘yin qoidalari:</h6>
+                    <ul class="mb-0 small fw-semibold text-secondary" id="intro-rules">
+                        <li>Har bir bosqichda 5 ta tezkor savol beriladi.</li>
+                        <li>Savollarga belgilangan vaqt ichida javob bering.</li>
+                        <li>Qancha tez va xatosiz bajarsangiz, shuncha ko‘p yulduz (⭐) olasiz!</li>
+                    </ul>
+                </div>
+
+                <div class="d-flex justify-content-center gap-3">
+                    <button class="btn btn-back" onclick="app.exitGame()">
+                        <i class="bi bi-x-lg me-1"></i>Bekor qilish
+                    </button>
+                    <button class="btn btn-play-lg" onclick="gameEngine.startSession()">
+                        <i class="bi bi-play-fill me-1"></i>Boshlash!
+                    </button>
+                </div>
+            </div>
+
+            <div id="game-active-card" class="game-card-container p-3 p-md-4 mx-auto d-none">
+                <div class="game-top-bar d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3 pb-3 border-bottom">
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-sm btn-outline-danger rounded-pill fw-bold" onclick="gameEngine.confirmExit()">
+                            <i class="bi bi-box-arrow-left"></i> Chiqish
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary rounded-pill fw-bold" onclick="gameEngine.togglePause()">
+                            <i class="bi bi-pause-fill"></i> Pauza
+                        </button>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="game-stat-pill">
+                            <span class="text-muted small">Savol:</span>
+                            <strong id="game-q-counter">1/5</strong>
+                        </div>
+                        <div class="game-stat-pill">
+                            <i class="bi bi-trophy-fill text-warning"></i>
+                            <strong id="game-score">0</strong>
+                        </div>
+                        <div class="game-timer-pill" id="timer-box">
+                            <i class="bi bi-stopwatch-fill"></i>
+                            <strong id="game-timer">20</strong>s
+                        </div>
+                    </div>
+                </div>
+
+                <div class="progress mb-4" style="height: 10px; border-radius: 10px;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" id="game-progress-bar" style="width: 20%"></div>
+                </div>
+
+                <div id="question-stage" class="question-stage text-center py-2"></div>
+                <div id="game-feedback" class="feedback-banner mt-3 d-none"></div>
+            </div>
+
+            <div id="game-result-card" class="game-card-container text-center p-4 p-md-5 mx-auto d-none">
+                <div class="result-stars mb-3" id="result-stars-display">⭐⭐⭐⭐⭐</div>
+                <h2 class="fw-bold mb-2" id="result-headline">Ajoyib natija!</h2>
+                <p class="text-muted mb-4" id="result-subtext">Siz bosqichni muvaffaqiyatli yakunladingiz!</p>
+
+                <div class="row g-3 justify-content-center mb-4" style="max-width: 600px; margin: 0 auto;">
+                    <div class="col-6 col-sm-3">
+                        <div class="stat-box bg-success-subtle text-success">
+                            <div class="stat-val" id="res-correct">5</div>
+                            <div class="stat-lbl">To‘g‘ri</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="stat-box bg-danger-subtle text-danger">
+                            <div class="stat-val" id="res-wrong">0</div>
+                            <div class="stat-lbl">Xato</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="stat-box bg-info-subtle text-info">
+                            <div class="stat-val" id="res-time">18s</div>
+                            <div class="stat-lbl">Vaqt</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="stat-box bg-warning-subtle text-warning-emphasis">
+                            <div class="stat-val" id="res-points">500</div>
+                            <div class="stat-lbl">Ball</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <button class="btn btn-back" onclick="app.exitGame()">
+                        <i class="bi bi-grid-3x3-gap-fill me-1"></i>Bosqichlar
+                    </button>
+                    <button class="btn btn-outline-fun" onclick="gameEngine.restartLevel()">
+                        <i class="bi bi-arrow-clockwise me-1"></i>Qayta o‘ynash
+                    </button>
+                    <button class="btn btn-play-lg" id="btn-next-level" onclick="gameEngine.nextLevel()">
+                        Keyingi bosqich <i class="bi bi-arrow-right-fill ms-1"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- PAUZA MODALI -->
+    <div class="modal fade" id="pauseModal" data-bs-backdrop="static" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content brain-modal text-center p-4">
+                <div class="display-1 mb-2">⏸️</div>
+                <h3 class="fw-bold">O‘yin to‘xtatildi</h3>
+                <p class="text-muted">Biroz dam oling va tayyor bo‘lganingizda davom eting!</p>
+                <div class="d-flex justify-content-center gap-3 mt-3">
+                    <button class="btn btn-outline-danger rounded-pill px-4 fw-bold" data-bs-dismiss="modal" onclick="app.exitGame()">Chiqish</button>
+                    <button class="btn btn-play-lg" data-bs-dismiss="modal" onclick="gameEngine.togglePause()">Davom etish</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOYDALANUVCHI PROFILI VA YULDUZLAR DO‘KONI MODALI -->
+    <div class="modal fade" id="profileModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content brain-modal p-3 p-md-4">
+                <div class="modal-header border-0">
+                    <h4 class="modal-title fw-bold"><i class="bi bi-person-badge-fill text-primary me-2"></i>Profil va Yulduzlar Do‘koni</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-4">
+                        <div class="col-lg-4 border-end-lg">
+                            <div class="profile-avatar-big mx-auto mb-3" id="profile-avatar-preview">🦊</div>
+                            <div class="text-center mb-3">
+                                <span class="badge bg-warning text-dark px-3 py-2 fs-6 fw-bold rounded-pill">
+                                    <i class="bi bi-star-fill me-1"></i> <span id="modal-star-count">0</span> yulduz
+                                </span>
+                            </div>
+                            <label class="form-label fw-bold small text-muted">Ismingiz:</label>
+                            <div class="input-group mb-3">
+                                <input type="text" id="profile-name-input" class="form-control text-center fw-bold" placeholder="Ismingizni yozing" maxlength="18">
+                                <button class="btn btn-primary fw-bold" onclick="app.saveProfile()">Saqlash</button>
+                            </div>
+                            <label class="form-label fw-bold small text-muted">Avatar tanlash (Bepul):</label>
+                            <div class="d-flex flex-wrap justify-content-center gap-2 mb-3" id="avatar-selector"></div>
+                        </div>
+                        <div class="col-lg-8">
+                            <ul class="nav nav-pills mb-3 justify-content-center gap-2" id="profileTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active rounded-pill fw-bold" id="stats-tab" data-bs-toggle="pill" data-bs-target="#stats-pane" type="button">📊 Statistika</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link rounded-pill fw-bold" id="shop-tab" data-bs-toggle="pill" data-bs-target="#shop-pane" type="button">🛍️ Yulduzlar Do‘koni</button>
+                                </li>
+                            </ul>
+                            <div class="tab-content" id="profileTabsContent">
+                                <div class="tab-pane fade show active" id="stats-pane" role="tabpanel">
+                                    <div class="row g-2 mb-4">
+                                        <div class="col-6 col-sm-3">
+                                            <div class="p-3 rounded-4 bg-warning-subtle text-center">
+                                                <div class="fs-4 fw-bold text-warning-emphasis" id="stat-total-stars">0</div>
+                                                <div class="small fw-semibold">Jami yulduz</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-sm-3">
+                                            <div class="p-3 rounded-4 bg-primary-subtle text-center">
+                                                <div class="fs-4 fw-bold text-primary" id="stat-games-played">0</div>
+                                                <div class="small fw-semibold">O‘ynalgan</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-sm-3">
+                                            <div class="p-3 rounded-4 bg-success-subtle text-center">
+                                                <div class="fs-4 fw-bold text-success" id="stat-tasks-done">0</div>
+                                                <div class="small fw-semibold">Bosqich</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-sm-3">
+                                            <div class="p-3 rounded-4 bg-info-subtle text-center">
+                                                <div class="fs-4 fw-bold text-info-emphasis" id="stat-best-score">0</div>
+                                                <div class="small fw-semibold">Max Ball</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <h6 class="fw-bold text-uppercase text-muted mb-2">Yo‘nalishlar bo‘yicha progress</h6>
+                                    <div id="profile-category-progress" class="small"></div>
+                                </div>
+                                <div class="tab-pane fade" id="shop-pane" role="tabpanel">
+                                    <p class="text-muted text-center small mb-3">To‘plagan yulduzlaringiz evaziga eksklyuziv avatarlar va unvonlarni xarid qiling!</p>
+                                    <div class="row g-3" id="shop-items-grid"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- REYTING JADVALI MODALI -->
+    <div class="modal fade" id="leaderboardModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content brain-modal p-3">
+                <div class="modal-header border-0">
+                    <h4 class="modal-title fw-bold">🏆 Eng Faol Bilimdonlar</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="leaderboard-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="text-center py-4 mt-5 text-muted small fw-semibold">
+        <div class="container">
+            <p class="mb-1">🧠 <strong>Brain Play</strong> — Bolalar uchun ta'limiy va mantiqiy o‘yinlar platformasi</p>
+            <p class="mb-0">O‘ynab o‘rganing, har kuni yangi marralarni zabt eting! ✨</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="script.js"></script>
+</body>
+</html>
